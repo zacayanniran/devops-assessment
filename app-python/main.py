@@ -8,7 +8,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
-from .publisher import publish_writes   # ← added this import
+from publisher import publish_writes   # ← added this import
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongo:27017/assessmentdb")
 APP_PORT  = int(os.getenv("APP_PORT", "8000"))
