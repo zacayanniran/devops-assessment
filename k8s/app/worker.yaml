@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: writer-worker
+  namespace: assessment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: writer-worker
+  template:
+    metadata:
+      labels:
+        app: writer-worker
+    spec:
+      containers:
+        - name: worker
+          image: app-python:local
+          command: ["python", "worker.py"]
+          env:
+            - name: PUBSUB_EMULATOR_HOST
+              value: "pubsub-emulator:8085"
+            - name: GOOGLE_CLOUD_PROJECT
+              value: "assessment-project"
+            - name: MONGODB_URI
+              value: "mongodb://mongo:27017/appdb"

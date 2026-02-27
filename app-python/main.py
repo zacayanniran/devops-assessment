@@ -8,6 +8,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
+from .publisher import publish_writes   # ← added this import
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongo:27017/assessmentdb")
 APP_PORT  = int(os.getenv("APP_PORT", "8000"))
@@ -75,39 +76,13 @@ def readiness_check():
 
 # Core endpoint — must perform exactly 5 reads and 5 writes per request
 @app.get("/api/data")
-def process_data():
-    c = get_col()
-    if c is None:
-        raise HTTPException(status_code=503, detail="MongoDB not reachable")
-
-    reads  = []
-    writes = []
-
-    try:
-        # 5 writes
-        for i in range(5):
-            result = c.insert_one({
-                "type":      "write",
-                "index":     i,
-                "payload":   random_payload(),
-                "timestamp": datetime.utcnow(),
-            })
-            writes.append(str(result.inserted_id))
-
-        # 5 reads
-        for i in range(5):
-            doc = c.find_one({"type": "write"})
-            reads.append(str(doc["_id"]) if doc else None)
-
-        return JSONResponse(content={
-            "status":    "success",
-            "reads":     reads,
-            "writes":    writes,
-            "timestamp": datetime.utcnow().isoformat(),
-        })
-
-    except PyMongoError as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+def data():
+    reads = [read_from_mongo(i) for i in range(5)]
+ 
+    writes = [{"k": i, "ts": time.time()} for i in range(5)]
+    publish_writes(writes)
+ 
+    return {"status":"accepted","reads":reads}
 
 
 # Collection stats

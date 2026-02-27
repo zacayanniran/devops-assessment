@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pubsub-setup
+  namespace: assessment
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: pubsub-setup
+          image: gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators
+          env:
+            - name: PUBSUB_EMULATOR_HOST
+              value: "pubsub-emulator:8085"
+            - name: GOOGLE_CLOUD_PROJECT
+              value: "assessment-project"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              gcloud pubsub topics create writes-topic
+              gcloud pubsub subscriptions create writes-sub --topic=writes-topic
