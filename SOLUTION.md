@@ -51,4 +51,4 @@ The assessment states the 5 reads and 5 writes cannot be changed, so I kept them
 d. Scaling MongoDB
 Not allowed by assessment rules, so only the application layer was scaled.
 
-The pods for Python App and worker not ready yet, still troubleshooting.
+Please see the screenshots folder for the screenshots.
